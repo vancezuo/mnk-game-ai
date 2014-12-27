@@ -95,10 +95,19 @@ public class MnkGameDemo {
         System.out.println("Missing row and/or column for move");
         return;
       }
+      if (getGame().getWinner() != MnkGame.PLAYER_NONE) {
+        String winner = getPlayerString(getGame().getWinner());
+        System.out.println("Game over, " + winner + " won");
+        return;
+      }
       try {
         int row = Integer.parseInt((String) args[0]);
         int col = Integer.parseInt((String) args[1]);
         getGame().doMove(row, col);
+        if (getGame().getWinner() != MnkGame.PLAYER_NONE) {
+          String winner = getPlayerString(getGame().getWinner());
+          System.out.println("Player " + winner + " wins!");
+        }
       } catch (NumberFormatException e) {
         System.out.println("Parse error: " + e.getMessage());
       } catch (IllegalArgumentException e) {

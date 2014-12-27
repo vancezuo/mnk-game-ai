@@ -16,10 +16,10 @@ public class MnkGame {
 
 
   private final int m, n, k, p, q;
-  private final int[] board;
-  private final int[] history;
+  private int[] board;
+  private int[] history;
   private int ply;
-  private int turn;
+  private int turn, winner;
 
 
   public MnkGame(int m, int n, int k, int p, int q) {
@@ -39,10 +39,7 @@ public class MnkGame {
     this.k = k;
     this.p = p;
     this.q = q;
-    board = new int[n * m];
-    history = new int[n * m];
-    ply = 0;
-    turn = PLAYER_1;
+    reset();
   }
 
   public MnkGame(int m, int n, int k) {
@@ -53,29 +50,60 @@ public class MnkGame {
     this(3, 3, 3);
   }
 
-  public boolean canDoMove(int row, int col) {
-    return (0 <= row && row < n) && (0 <= col && col < m)
-        && (board[row * m + col] == PLAYER_NONE);
-  }
 
-  public void doMove(int row, int col) {
+  public void doMove(int row, int col, boolean checkLegal) {
+    if (checkLegal && !canDoMove(row, col))
+      throw new IllegalArgumentException("Illegal move: " + row + "," + col);
     int index = row*m + col;
     board[index] = turn;
     history[ply++] = index;
+    winner = calculateWinner(row, col);
     if (ply >= q && (ply - q) % p == 0)
       turn = -turn;
+  }
+
+  public void doMove(int row, int col) {
+    doMove(row, col, true);
+  }
+
+  public void undoMove(boolean checkLegal) {
+    if (checkLegal && !canUndoMove())
+      throw new IllegalArgumentException("Cannot undo any moves");
+    int index = history[ply - 1];
+    if (ply >= q && (ply - q) % p == 0)
+      turn = -turn;
+    winner = PLAYER_NONE;
+    ply--;
+    board[index] = PLAYER_NONE;
+  }
+
+  public void undoMove() {
+    undoMove(true);
+  }
+
+  public void reset(int[][] presetBoard) {
+    board = new int[n * m];
+    history = new int[n * m];
+    ply = 0;
+    turn = PLAYER_1;
+    winner = PLAYER_NONE;
+    if (presetBoard != null)
+      for (int row = 0; row < n; row++)
+        for (int col = 0; col < m; col++)
+          board[row*m + col] = presetBoard[row][col];
+  }
+
+  public void reset() {
+    reset(null);
+  }
+
+  public boolean canDoMove(int row, int col) {
+    return (0 <= row && row < n) && (0 <= col && col < m)
+        && (board[row * m + col] == PLAYER_NONE) && (winner == PLAYER_NONE);
   }
 
   public boolean canUndoMove() {
     return ply > 0;
-  }
-
-  public void undoMove() {
-    int index = history[ply - 1];
-    if (ply >= q && (ply - q) % p == 0)
-      turn = -turn;
-    ply--;
-    board[index] = PLAYER_NONE;
   }
 
   public int getCols() {
@@ -102,6 +130,10 @@ public class MnkGame {
     return turn;
   }
 
+  public int getWinner() {
+    return winner;
+  }
+
   public int[] getHistory() {
     int[] historyTrimmed = new int[ply];
     for (int i = 0; i < ply; i++)
@@ -111,9 +143,9 @@ public class MnkGame {
 
   public int[][] getBoard() {
     int[][] board2d = new int[n][m];
-    for (int i = 0; i < n; i++)
-      for (int j = 0; j < m; j++)
-        board2d[i][j] = board[i*m + j];
+    for (int row = 0; row < n; row++)
+      for (int col = 0; col < m; col++)
+        board2d[row][col] = board[row*m + col];
     return board2d;
   }
 
@@ -121,6 +153,27 @@ public class MnkGame {
     if (ply < q)
       return 0;
     return 1 + (ply - q) % p;
+  }
+
+
+  private int calculateWinner(int row, int col) {
+    int startIndex = row * m + col;
+    int[][] dirs = { {-1, 1}, {-m, m}, {-m - 1, m + 1}, {-m + 1, m - 1} };
+    int[][] lens = { {col, m - 1 - col}, {row, n - 1 - row},
+                     {Math.min(col, row), Math.min(n - 1 - col, m - 1 - row)},
+                     {Math.min(n - 1 - col, row), Math.min(col, m - 1 - row)} };
+    for (int i0 = 0; i0 < 4; i0++) {
+      int consecutive = 1;
+      for (int i1 = 0; i1 < 2; i1++) {
+        for (int index = startIndex, j = 0; j < lens[i0][i1]; j++) {
+          if (board[(index += dirs[i0][i1])] != turn)
+            break;
+          if (++consecutive >= k)
+            return turn;
+        }
+      }
+    }
+    return PLAYER_NONE;
   }
 
 }
