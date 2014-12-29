@@ -136,8 +136,19 @@ public class MnkGameDemo {
    * @param args
    */
   public static void main(String[] args) {
+    int m = 3, n = 3, k = 3, p = 1, q = 1;
+    if (args.length >= 3) {
+      m = Integer.parseInt(args[0]);
+      n = Integer.parseInt(args[1]);
+      k = Integer.parseInt(args[2]);
+    }
+    if (args.length >= 5) {
+      p = Integer.parseInt(args[3]);
+      q = Integer.parseInt(args[4]);
+    }
+
     Scanner in = new Scanner(System.in);
-    MnkGame game = new MnkGame();
+    MnkGame game = new MnkGame(m, n, k, p, q);
 
     Command[] commands =
         new Command[] {new DisplayCommand(game), new NewGameCommand(game),
