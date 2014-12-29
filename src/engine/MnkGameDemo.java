@@ -62,11 +62,16 @@ public class MnkGameDemo {
     @Override
     public void execute(Object... args) {
       int[][] board = getGame().getBoard();
-      for (int i = 0; i < getGame().getRows(); i++) {
-        System.out.printf("%2d ", i);
-        for (int j = 0; j < getGame().getCols(); j++) {
-          String c = getPlayerString(board[i][j]);
-          System.out.print(c != null ? c : '?');
+      System.out.print("  ");
+      for (int col = 0; col < getGame().getCols(); col++) {
+        System.out.printf("%2d", col);
+      }
+      System.out.println();
+      for (int row = 0; row < getGame().getRows(); row++) {
+        System.out.printf("%2d ", row);
+        for (int col = 0; col < getGame().getCols(); col++) {
+          String c = getPlayerString(board[row][col]);
+          System.out.print((c != null ? c : '?') + " ");
         }
         System.out.println();
       }
