@@ -180,25 +180,34 @@ public class MnkGame {
     return 1 + (ply - q) % p;
   }
 
-  public Iterator<Integer> getLegalMoves() {
-    return new Iterator<Integer>() {
-      int index = 0;
+  public int getPseudolegalMoves() {
+    return m * n - ply;
+  }
 
+  public Iterable<Integer> generatePseudolegalMoves() {
+    return new Iterable<Integer>() {
       @Override
-      public boolean hasNext() {
-        while (index < n * m) {
-          if (board[index] == PLAYER_NONE)
-            return true;
-          index++;
-        }
-        return false;
-      }
+      public Iterator<Integer> iterator() {
+        return new Iterator<Integer>() {
+          int index = 0;
 
-      @Override
-      public Integer next() {
-        if (!hasNext())
-          throw new NoSuchElementException();
-        return index++;
+          @Override
+          public boolean hasNext() {
+            while (index < n * m) {
+              if (board[index] == PLAYER_NONE)
+                return true;
+              index++;
+            }
+            return false;
+          }
+
+          @Override
+          public Integer next() {
+            if (!hasNext())
+              throw new NoSuchElementException();
+            return index++;
+          }
+        };
       }
     };
   }
