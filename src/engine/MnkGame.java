@@ -57,20 +57,26 @@ public class MnkGame {
     this(3, 3, 3);
   }
 
-
   public void doMove(int row, int col, boolean checkLegal) {
-    if (checkLegal && !canDoMove(row, col))
+    doMove(getSquare(row, col));
+  }
+
+  public void doMove(int square, boolean checkLegal) {
+    if (checkLegal && !canDoMove(square))
       throw new IllegalArgumentException("Illegal move.");
-    int index = getIndex(row, col);
-    board[index] = turn;
-    history[ply++] = index;
-    winner = calculateWinner(row, col);
+    board[square] = turn;
+    history[ply++] = square;
+    winner = calculateWinner(square);
     if (ply >= q && (ply - q) % p == 0)
       turn = -turn;
   }
 
   public void doMove(int row, int col) {
     doMove(row, col, true);
+  }
+
+  public void doMove(int square) {
+    doMove(square, true);
   }
 
   public void undoMove(boolean checkLegal) {
@@ -88,14 +94,17 @@ public class MnkGame {
     undoMove(true);
   }
 
-  public boolean canDoMove(int row, int col) {
-    return (0 <= row && row < n) && (0 <= col && col < m)
-        && (board[getIndex(row, col)] == PLAYER_NONE)
+  public boolean canDoMove(int square) {
+    return (0 <= square && square < n * m) && (board[square] == PLAYER_NONE)
         && (winner == PLAYER_NONE);
   }
 
   public boolean canUndoMove() {
     return ply > 0;
+  }
+
+  public boolean isGameOver() {
+    return (winner != PLAYER_NONE);
   }
 
   public int getCols() {
@@ -134,8 +143,20 @@ public class MnkGame {
     return m * n;
   }
 
-  public int getPiece(int row, int col) {
-    return board[getIndex(row, col)];
+  public int getSquare(int row, int col) {
+    return row*m + col;
+  }
+
+  public int getRow(int square) {
+    return square / n;
+  }
+
+  public int getCol(int square) {
+    return square % n;
+  }
+
+  public int getPiece(int square) {
+    return board[square];
   }
 
   public int[] getHistory() {
@@ -149,7 +170,7 @@ public class MnkGame {
     int[][] board2d = new int[n][m];
     for (int row = 0; row < n; row++)
       for (int col = 0; col < m; col++)
-        board2d[row][col] = board[getIndex(row, col)];
+        board2d[row][col] = board[getSquare(row, col)];
     return board2d;
   }
 
@@ -183,8 +204,9 @@ public class MnkGame {
   }
 
 
-  private int calculateWinner(int row, int col) {
-    int startIndex = getIndex(row, col);
+  private int calculateWinner(int square) {
+    int row = getRow(square);
+    int col = getCol(square);
     int[][] dirs = { {-1, 1}, {-m, m}, {-m - 1, m + 1}, {-m + 1, m - 1} };
     int[][] lens = { {col, m - 1 - col}, {row, n - 1 - row},
                      {Math.min(col, row), Math.min(n - 1 - col, m - 1 - row)},
@@ -192,7 +214,7 @@ public class MnkGame {
     for (int i0 = 0; i0 < 4; i0++) {
       int consecutive = 1;
       for (int i1 = 0; i1 < 2; i1++) {
-        for (int index = startIndex, j = 0; j < lens[i0][i1]; j++) {
+        for (int index = square, j = 0; j < lens[i0][i1]; j++) {
           if (board[(index += dirs[i0][i1])] != turn)
             break;
           if (++consecutive >= k)
@@ -201,10 +223,6 @@ public class MnkGame {
       }
     }
     return PLAYER_NONE;
-  }
-
-  private int getIndex(int row, int col) {
-    return row*m + col;
   }
 
 }
