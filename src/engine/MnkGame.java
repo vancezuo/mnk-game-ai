@@ -3,6 +3,9 @@
  */
 package engine;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  * @author Vance Zuo
  * @created Dec 20, 2014
@@ -134,6 +137,10 @@ public class MnkGame {
     return winner;
   }
 
+  public int getPiece(int row, int col) {
+    return board[row * m + col];
+  }
+
   public int[] getHistory() {
     int[] historyTrimmed = new int[ply];
     for (int i = 0; i < ply; i++)
@@ -153,6 +160,29 @@ public class MnkGame {
     if (ply < q)
       return 0;
     return 1 + (ply - q) % p;
+  }
+
+  public Iterator<Integer> getLegalMoves() {
+    return new Iterator<Integer>() {
+      int index = 0;
+
+      @Override
+      public boolean hasNext() {
+        while (index < n * m) {
+          if (board[index] == PLAYER_NONE)
+            return true;
+          index++;
+        }
+        return false;
+      }
+
+      @Override
+      public Integer next() {
+        if (!hasNext())
+          throw new NoSuchElementException();
+        return index++;
+      }
+    };
   }
 
 
