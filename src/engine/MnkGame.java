@@ -3,6 +3,7 @@
  */
 package engine;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -184,6 +185,12 @@ public class MnkGame {
     return getSquares() - getOccupiedSquares();
   }
 
+  public int getLegalMoves() {
+    if (winner != PLAYER_NONE)
+      return 0;
+    return getPseudolegalMoves();
+  }
+
   public Iterable<Integer> generatePseudolegalMoves() {
     return new Iterable<Integer>() {
       @Override
@@ -210,6 +217,12 @@ public class MnkGame {
         };
       }
     };
+  }
+
+  public Iterable<Integer> generateLegalMoves() {
+    if (winner != PLAYER_NONE)
+      return Collections.emptyList();
+    return generatePseudolegalMoves();
   }
 
 

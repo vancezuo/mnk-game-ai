@@ -95,6 +95,8 @@ public class MnkGameSearcher {
       game.doMove(move, false);
       Result result = minimax(depth - 1);
       game.undoMove();
+      if (Thread.currentThread().isInterrupted())
+        return null;
       if ((maxi && result.score > score) || (!maxi && result.score < score)) {
         score = result.score;
         pv.clear();

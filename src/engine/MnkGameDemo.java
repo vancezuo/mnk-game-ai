@@ -6,6 +6,7 @@ package engine;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Vance Zuo
@@ -97,6 +98,55 @@ public class MnkGameDemo {
     }
   }
 
+  private static class AiPlayCommand extends Command {
+    public AiPlayCommand(MnkGameDemo game) {
+      super(game, "ai", "a");
+    }
+
+    @Override
+    public void execute(String... args) {
+      try {
+        getGame().computerMove();
+      } catch (ExecutionException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private static class AiSetDepthCommand extends Command {
+    public AiSetDepthCommand(MnkGameDemo game) {
+      super(game, "set-depth", "sd");
+    }
+
+    @Override
+    public void execute(String... args) {
+      try {
+        getGame().setComputerDepth(Integer.parseInt(args[0]));
+      } catch (NumberFormatException e) {
+        System.out.println("Parse error: " + e.getMessage());
+      } catch (ArrayIndexOutOfBoundsException e) {
+        System.out.println("No depth specified.");
+      }
+    }
+  }
+
+  private static class AiSetTimeCommand extends Command {
+    public AiSetTimeCommand(MnkGameDemo game) {
+      super(game, "set-time", "st");
+    }
+
+    @Override
+    public void execute(String... args) {
+      try {
+        getGame().setComputerTime(Integer.parseInt(args[0]));
+      } catch (NumberFormatException e) {
+        System.out.println("Parse error: " + e.getMessage());
+      } catch (ArrayIndexOutOfBoundsException e) {
+        System.out.println("No time limit specified.");
+      }
+    }
+  }
+
   private static class UndoCommand extends Command {
     public UndoCommand(MnkGameDemo game) {
       super(game, "undo", "u");
@@ -116,8 +166,10 @@ public class MnkGameDemo {
     }
   }
 
+
   private Map<Integer, String> playerCharacter;
   private MnkGame game;
+  private MnkGameAi ai;
 
   public MnkGameDemo() {
     game = new MnkGame();
@@ -126,7 +178,9 @@ public class MnkGameDemo {
       put(MnkGame.PLAYER_1, "X");
       put(MnkGame.PLAYER_2, "O");
     }};
+    ai = new MnkGameAi(game);
   }
+
 
   /**
    * @param args
@@ -135,10 +189,11 @@ public class MnkGameDemo {
     Scanner in = new Scanner(System.in);
     MnkGameDemo game = new MnkGameDemo();
 
-    Command[] cmds = new Command[] {new DisplayCommand(game),
-                                    new NewGameCommand(game),
-                                    new PlayCommand(game),
-                                    new UndoCommand(game)};
+    Command[] cmds =
+        new Command[] {new DisplayCommand(game), new NewGameCommand(game),
+                       new PlayCommand(game), new UndoCommand(game),
+                       new AiPlayCommand(game), new AiSetDepthCommand(game),
+                       new AiSetTimeCommand(game)};
 
     String token = "";
     loop: while (in.hasNext()) {
@@ -147,7 +202,12 @@ public class MnkGameDemo {
         break;
       for (Command cmd : cmds) {
         if (cmd.hasName(token)) {
-          cmd.execute(in.nextLine().trim().split("\\s+"));
+          String cmdArgs = in.nextLine().trim();
+          if (cmdArgs.equals("")) {
+            cmd.execute();
+          } else {
+            cmd.execute(cmdArgs.split("\\s+"));
+          }
           continue loop;
         }
       }
@@ -158,8 +218,10 @@ public class MnkGameDemo {
     in.close();
   }
 
+
   private void newGame(int m, int n, int k, int p, int q) {
     game = new MnkGame(m, n, k, p, q);
+    ai = new MnkGameAi(game);
     System.out.printf("New game: %d by %d board; %d-in-a-row", n, m, k);
     if (p > 1 || q > 1)
       System.out.printf("; %d, %d, %d... moves", q, p, p);
@@ -183,22 +245,49 @@ public class MnkGameDemo {
     }
   }
 
-  private void playMove(int row, int col) {
-    if (game.getWinner() != MnkGame.PLAYER_NONE) {
-      String winner = playerCharacter.get(game.getWinner());
-      System.out.println("Game over, " + winner + " won.");
-      return;
+  private void setComputerTime(int millis) {
+    try {
+      ai.setMaxTime(millis);
+    } catch (IllegalArgumentException e) {
+      System.out.println("Invalid time value. No changes made.");
     }
+  }
+
+  private void setComputerDepth(int depth) {
+    try {
+      ai.setMaxDepth(depth);
+    } catch (IllegalArgumentException e) {
+      System.out.println("Invalid depth value. No changes made.");
+    }
+  }
+
+  private void playMove(int row, int col) {
+    if (checkGameOver("Game over, player %s won."))
+      return;
     try {
       game.doMove(row, col);
     } catch (IllegalArgumentException e) {
       System.out.println("Error: " + e.getMessage());
       return;
     }
-    if (game.getWinner() != MnkGame.PLAYER_NONE) {
+    checkGameOver("Player %s has won!");
+  }
+
+  private void computerMove() throws ExecutionException {
+    if (checkGameOver("Game over, player %s won."))
+      return;
+    int move = ai.think();
+    playMove(game.getRow(move), game.getCol(move));
+  }
+
+  private boolean checkGameOver(String format) {
+    if (game.isGameOver()) {
       String winner = playerCharacter.get(game.getWinner());
-      System.out.println("Player " + winner + " wins!");
+      System.out.printf(format, winner);
+      System.out.println();
+      return true;
     }
+    return false;
   }
 
   private void undoMove(int times) {
@@ -210,7 +299,8 @@ public class MnkGameDemo {
       }
     } catch (IllegalArgumentException e) {
       System.out.println("Error: " + e.getMessage());
-      System.out.println("Able to undo " + i + " moves.");
+      if (i > 0)
+        System.out.println("Was to undo " + i + " moves.");
     }
   }
 }
