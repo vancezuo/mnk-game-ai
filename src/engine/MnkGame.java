@@ -104,7 +104,7 @@ public class MnkGame {
   }
 
   public boolean isGameOver() {
-    return (winner != PLAYER_NONE);
+    return (winner != PLAYER_NONE) || (getOccupiedSquares() == getSquares());
   }
 
   public int getCols() {
@@ -139,7 +139,7 @@ public class MnkGame {
     return winner;
   }
 
-  public int getTotalSquares() {
+  public int getSquares() {
     return m * n;
   }
 
@@ -181,7 +181,7 @@ public class MnkGame {
   }
 
   public int getPseudolegalMoves() {
-    return m * n - ply;
+    return getSquares() - getOccupiedSquares();
   }
 
   public Iterable<Integer> generatePseudolegalMoves() {
