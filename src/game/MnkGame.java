@@ -1,7 +1,7 @@
 /**
  * Copyright 2014 Vance Zuo
  */
-package engine;
+package game;
 
 import java.util.Collections;
 import java.util.Iterator;

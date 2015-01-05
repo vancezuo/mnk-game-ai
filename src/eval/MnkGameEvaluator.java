@@ -1,7 +1,9 @@
 /**
  * Copyright 2014 Vance Zuo
  */
-package engine;
+package eval;
+
+import game.MnkGame;
 
 /**
  * @author Vance Zuo

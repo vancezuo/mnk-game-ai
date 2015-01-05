@@ -1,7 +1,7 @@
 /**
  * Copyright 2014 Vance Zuo
  */
-package engine;
+package game;
 
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -10,6 +10,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import search.MnkGameSearcher;
+import search.MnkGameSearcher.Result;
+import search.MnkGameSearcher.Task;
+import eval.MnkGameEvaluator;
 
 
 /**

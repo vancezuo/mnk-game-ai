@@ -1,7 +1,10 @@
 /**
  * Copyright 2014 Vance Zuo
  */
-package engine;
+package search;
+
+import eval.MnkGameEvaluator;
+import game.MnkGame;
 
 import java.util.ArrayList;
 import java.util.List;
