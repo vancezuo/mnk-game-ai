@@ -11,10 +11,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import search.MnkGameMinimaxSearcher;
 import search.MnkGameSearcher;
-import search.MnkGameSearcher.Result;
-import search.MnkGameSearcher.Task;
-import eval.MnkGameEvaluator;
+import eval.MnkGameBasicEvaluator;
 
 
 /**
@@ -43,7 +42,7 @@ public class MnkGameAi {
 
 
   public MnkGameAi(MnkGame game) {
-    searcher = new MnkGameSearcher(new MnkGameEvaluator(game));
+    searcher = new MnkGameMinimaxSearcher(new MnkGameBasicEvaluator(game));
 
     depth = MAX_DEPTH;
     time = MAX_TIME;
@@ -67,7 +66,7 @@ public class MnkGameAi {
   public void setLogPv(boolean enabled) {
     log = enabled ? (log | LOG_PV) : (log & ~LOG_PV);
   }
-  
+
   public void setLogMove(boolean enabled) {
     log = enabled ? (log | LOG_MOVE) : (log & ~LOG_MOVE);
   }

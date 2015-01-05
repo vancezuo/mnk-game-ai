@@ -10,7 +10,7 @@ import game.MnkGame;
  * @created Dec 30, 2014
  *
  */
-public class MnkGameEvaluator {
+public abstract class MnkGameEvaluator {
 
   public static final int PLAYER_MAX = MnkGame.PLAYER_1;
   public static final int PLAYER_MIN = MnkGame.PLAYER_2;
@@ -27,20 +27,10 @@ public class MnkGameEvaluator {
   }
 
 
-  public MnkGame getGame() {
+  public final MnkGame getGame() {
     return game;
   }
 
-  public int evaluate() {
-    int winner = game.getWinner();
-    switch (winner) {
-      case MnkGame.PLAYER_1:
-        return MAX_SCORE;
-      case MnkGame.PLAYER_2:
-        return MIN_SCORE;
-      default:
-        return 0;
-    }
-  }
+  public abstract int evaluate();
 
 }
