@@ -262,7 +262,7 @@ public class MnkGameDemo {
   }
 
   private void playMove(int row, int col) {
-    if (checkGameOver("Game over, player %s won."))
+    if (checkGameOver("Game over, player %s won.", "Game over, draw."))
       return;
     try {
       game.doMove(row, col);
@@ -270,20 +270,20 @@ public class MnkGameDemo {
       System.out.println("Error: " + e.getMessage());
       return;
     }
-    checkGameOver("Player %s has won!");
+    checkGameOver("Player %s has won!", "Draw!");
   }
 
   private void computerMove() throws ExecutionException {
-    if (checkGameOver("Game over, player %s won."))
+    if (checkGameOver("Game over, player %s won.", "Game over, draw."))
       return;
     int move = ai.think();
     playMove(game.getRow(move), game.getCol(move));
   }
 
-  private boolean checkGameOver(String format) {
+  private boolean checkGameOver(String winFormat, String drawFormat) {
     if (game.isGameOver()) {
       String winner = playerCharacter.get(game.getWinner());
-      System.out.printf(format, winner);
+      System.out.printf(game.hasWinner() ? winFormat : drawFormat, winner);
       System.out.println();
       return true;
     }

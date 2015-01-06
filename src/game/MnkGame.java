@@ -104,8 +104,12 @@ public class MnkGame {
     return ply > 0;
   }
 
+  public boolean hasWinner() {
+    return winner != PLAYER_NONE;
+  }
+
   public boolean isGameOver() {
-    return (winner != PLAYER_NONE) || (getOccupiedSquares() == getSquares());
+    return hasWinner() || (getOccupiedSquares() == getSquares());
   }
 
   public int getCols() {
