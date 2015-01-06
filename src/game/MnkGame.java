@@ -153,11 +153,11 @@ public class MnkGame {
   }
 
   public int getRow(int square) {
-    return square / n;
+    return square / m;
   }
 
   public int getCol(int square) {
-    return square % n;
+    return square % m;
   }
 
   public int getPiece(int square) {
@@ -235,8 +235,8 @@ public class MnkGame {
     int col = getCol(square);
     int[][] dirs = { {-1, 1}, {-m, m}, {-m - 1, m + 1}, {-m + 1, m - 1} };
     int[][] lens = { {col, m - 1 - col}, {row, n - 1 - row},
-                     {Math.min(col, row), Math.min(n - 1 - col, m - 1 - row)},
-                     {Math.min(n - 1 - col, row), Math.min(col, m - 1 - row)} };
+                     {Math.min(col, row), Math.min(m - 1 - col, n - 1 - row)},
+                     {Math.min(m - 1 - col, row), Math.min(col, n - 1 - row)} };
     for (int i0 = 0; i0 < 4; i0++) {
       int consecutive = 1;
       for (int i1 = 0; i1 < 2; i1++) {
