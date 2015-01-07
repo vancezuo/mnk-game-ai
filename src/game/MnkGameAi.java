@@ -13,7 +13,7 @@ import java.util.concurrent.TimeoutException;
 
 import search.MnkGameMinimaxSearcher;
 import search.MnkGameSearcher;
-import eval.MnkGameBasicEvaluator;
+import eval.MnkGameRandomEvaluator;
 
 
 /**
@@ -42,7 +42,7 @@ public class MnkGameAi {
 
 
   public MnkGameAi(MnkGame game) {
-    searcher = new MnkGameMinimaxSearcher(new MnkGameBasicEvaluator(game));
+    searcher = new MnkGameMinimaxSearcher(new MnkGameRandomEvaluator(game));
 
     depth = MAX_DEPTH;
     time = MAX_TIME;
