@@ -70,6 +70,7 @@ public abstract class MnkGameSearcher {
 
   private MnkGame game;
   private MnkGameEvaluator eval;
+  private long nodes;
 
 
   public MnkGameSearcher(MnkGameEvaluator eval) {
@@ -78,12 +79,20 @@ public abstract class MnkGameSearcher {
   }
 
 
+  protected final void incrementNodeCount() {
+    nodes++;
+  }
+
   public final MnkGame getGame() {
     return game;
   }
 
   public final MnkGameEvaluator getEvaluator() {
     return eval;
+  }
+
+  public final long getNodeCount() {
+    return nodes;
   }
 
   public abstract Result search(int depth);

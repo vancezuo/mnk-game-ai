@@ -21,6 +21,8 @@ public class MnkGameMinimaxSearcher extends MnkGameSearcher {
 
   @Override
   public Result search(int depth) {
+    incrementNodeCount();
+
     if (getGame().isGameOver())
       return new Result(getEvaluator().evaluate(), null, true);
     if (depth <= 0)

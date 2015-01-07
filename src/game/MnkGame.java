@@ -179,10 +179,28 @@ public class MnkGame {
     return board2d;
   }
 
-  public int getElapsedTurns() {
-    if (ply < q)
+  public int getElapsedPly() {
+    return ply;
+  }
+
+  public int getElapsedTurns(int totalPly) {
+    if (totalPly < q)
       return 0;
-    return 1 + (ply - q) % p;
+    return 1 + (totalPly - q) % p;
+  }
+
+  public int getElapsedTurns() {
+    return getElapsedTurns(ply);
+  }
+
+  public int getTurnRemainingMoves(int totalPly) {
+    if (totalPly < q)
+      return q - totalPly;
+    return p - (totalPly - q) % p;
+  }
+
+  public int getTurnRemainingMoves() {
+    return getTurnRemainingMoves(ply);
   }
 
   public int getPseudolegalMoves() {

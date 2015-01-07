@@ -88,7 +88,9 @@ public class MnkGameAi {
       throw new IllegalStateException("Game over. No legal moves.");
 
     ExecutorService executor = Executors.newSingleThreadExecutor();
-    long timeEnd = System.currentTimeMillis() + time;
+    long timeStart = System.currentTimeMillis();
+    long timeEnd = timeStart + time;
+    long nodesStart = searcher.getNodeCount();
     MnkGameSearcher.Result result = null;
     if ((log & LOG_PV) != 0)
       printSearchResultHeader();
@@ -104,7 +106,8 @@ public class MnkGameAi {
         future.cancel(true);
       }
       if ((log & LOG_PV) != 0)
-        printSearchResult(result, i);
+        printSearchResult(result, i, System.currentTimeMillis() - timeStart,
+            searcher.getNodeCount() - nodesStart);
       if (result.isProvenResult())
         break;
     }
@@ -125,12 +128,15 @@ public class MnkGameAi {
 
 
   private void printSearchResultHeader() {
-    System.out.println("Depth  Score  Variation");
+    System.out.println("Depth\tTime\tNodes\tScore\tVariation");
   }
 
-  private void printSearchResult(MnkGameSearcher.Result result, int i) {
-    System.out.printf(" %3d  % .3f ", i, result.getScoreScaled());
-    for (int move : result.getPrincipleVaration()) {
+  private void printSearchResult(MnkGameSearcher.Result r, int d, long t, long n) {
+    System.out.printf("%d\t", d);
+    System.out.printf("%.3f\t", t / 1000.0);
+    System.out.printf("%d\t", n);
+    System.out.printf("% .3f\t", r.getScoreScaled());
+    for (int move : r.getPrincipleVaration()) {
       int row = getGame().getRow(move);
       int col = getGame().getCol(move);
       System.out.print(" " + row + "," + col);
