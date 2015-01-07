@@ -102,6 +102,9 @@ public class MnkGameAi {
         result = future.get(timeRemaining, TimeUnit.MILLISECONDS);
       } catch (TimeoutException | InterruptedException e) {
         break;
+      } catch (ExecutionException e) {
+        executor.shutdown();
+        throw e;
       } finally {
         future.cancel(true);
       }
@@ -111,6 +114,7 @@ public class MnkGameAi {
       if (result.isProvenResult())
         break;
     }
+    executor.shutdown();
 
     int move;
     if (result != null) {
