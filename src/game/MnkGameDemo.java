@@ -8,6 +8,12 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
+import search.MnkGameMinimaxSearcher;
+import search.MnkGameSearcher;
+import eval.MnkGameBasicEvaluator;
+import eval.MnkGameEvaluator;
+import eval.MnkGameRandomEvaluator;
+
 /**
  * @author Vance Zuo
  * @created Dec 25, 2014
@@ -138,11 +144,41 @@ public class MnkGameDemo {
     @Override
     public void execute(String... args) {
       try {
-        getGame().setComputerTime(Integer.parseInt(args[0]));
+        getGame().setComputerTime(Integer.parseInt(args[0]) * 1000);
       } catch (NumberFormatException e) {
         System.out.println("Parse error: " + e.getMessage());
       } catch (ArrayIndexOutOfBoundsException e) {
         System.out.println("No time limit specified.");
+      }
+    }
+  }
+
+  private static class AiSetEvalCommand extends Command {
+    public AiSetEvalCommand(MnkGameDemo game) {
+      super(game, "set-eval", "se");
+    }
+
+    @Override
+    public void execute(String... args) {
+      try {
+        getGame().setComputerEval(args[0]);
+      } catch (ArrayIndexOutOfBoundsException e) {
+        System.out.println("No evaluator class specified.");
+      }
+    }
+  }
+
+  private static class AiSetSearchCommand extends Command {
+    public AiSetSearchCommand(MnkGameDemo game) {
+      super(game, "set-search", "ss");
+    }
+
+    @Override
+    public void execute(String... args) {
+      try {
+        getGame().setComputerSearch(args[0]);
+      } catch (ArrayIndexOutOfBoundsException e) {
+        System.out.println("No searcher class specified.");
       }
     }
   }
@@ -167,16 +203,25 @@ public class MnkGameDemo {
   }
 
 
-  private Map<Integer, String> playerCharacter;
+  private Map<Integer, String> playerCharMap;
+  private Map<String, Class<? extends MnkGameEvaluator>> evaluatorMap;
+  private Map<String, Class<? extends MnkGameSearcher>> searcherMap;
   private MnkGame game;
   private MnkGameAi ai;
 
   public MnkGameDemo() {
     game = new MnkGame();
-    playerCharacter = new HashMap<Integer, String>() {{
+    playerCharMap = new HashMap<Integer, String>() {{
       put(MnkGame.PLAYER_NONE, ".");
       put(MnkGame.PLAYER_1, "X");
       put(MnkGame.PLAYER_2, "O");
+    }};
+    evaluatorMap = new HashMap<String, Class<? extends MnkGameEvaluator>>() {{
+      put("basic", MnkGameBasicEvaluator.class);
+      put("random", MnkGameRandomEvaluator.class);
+    }};
+    searcherMap = new HashMap<String, Class<? extends MnkGameSearcher>>() {{
+      put("minimax", MnkGameMinimaxSearcher.class);
     }};
     ai = new MnkGameAi(game);
   }
@@ -193,7 +238,8 @@ public class MnkGameDemo {
         new Command[] {new DisplayCommand(game), new NewGameCommand(game),
                        new PlayCommand(game), new UndoCommand(game),
                        new AiPlayCommand(game), new AiSetDepthCommand(game),
-                       new AiSetTimeCommand(game)};
+                       new AiSetTimeCommand(game), new AiSetEvalCommand(game),
+                       new AiSetSearchCommand(game)};
 
     String token = "";
     loop: while (in.hasNext()) {
@@ -221,7 +267,7 @@ public class MnkGameDemo {
 
   private void newGame(int m, int n, int k, int p, int q) {
     game = new MnkGame(m, n, k, p, q);
-    ai = new MnkGameAi(game);
+    ai.setGame(game);
     System.out.printf("New game: %d by %d board; %d-in-a-row", n, m, k);
     if (p > 1 || q > 1)
       System.out.printf("; %d, %d, %d... moves", q, p, p);
@@ -238,7 +284,7 @@ public class MnkGameDemo {
     for (int row = 0; row < game.getRows(); row++) {
       System.out.printf("%2d ", row);
       for (int col = 0; col < game.getCols(); col++) {
-        String c = playerCharacter.get(board[row][col]);
+        String c = playerCharMap.get(board[row][col]);
         System.out.print((c != null ? c : '?') + " ");
       }
       System.out.println();
@@ -259,6 +305,28 @@ public class MnkGameDemo {
     } catch (IllegalArgumentException e) {
       System.out.println("Invalid depth value. No changes made.");
     }
+  }
+
+  private void setComputerEval(String mode) {
+    if (!evaluatorMap.containsKey(mode)) {
+      System.out.print("Invalid evaluation mode. Valid:");
+      for (String s : evaluatorMap.keySet())
+        System.out.print(" " + s);
+      System.out.println(".");
+      return;
+    }
+    ai.setEvaluator(evaluatorMap.get(mode));
+  }
+
+  private void setComputerSearch(String mode) {
+    if (!searcherMap.containsKey(mode)) {
+      System.out.print("Invalid search mode. Valid:");
+      for (String s : searcherMap.keySet())
+        System.out.print(" " + s);
+      System.out.println(".");
+      return;
+    }
+    ai.setSearcher(searcherMap.get(mode));
   }
 
   private void playMove(int row, int col) {
@@ -282,7 +350,7 @@ public class MnkGameDemo {
 
   private boolean checkGameOver(String winFormat, String drawFormat) {
     if (game.isGameOver()) {
-      String winner = playerCharacter.get(game.getWinner());
+      String winner = playerCharMap.get(game.getWinner());
       System.out.printf(game.hasWinner() ? winFormat : drawFormat, winner);
       System.out.println();
       return true;

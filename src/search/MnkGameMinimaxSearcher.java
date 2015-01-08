@@ -3,10 +3,11 @@
  */
 package search;
 
+import eval.MnkGameEvaluator;
+import game.MnkGame;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import eval.MnkGameEvaluator;
 
 /**
  * @author Vance Zuo
@@ -15,8 +16,8 @@ import eval.MnkGameEvaluator;
  */
 public class MnkGameMinimaxSearcher extends MnkGameSearcher {
 
-  public MnkGameMinimaxSearcher(MnkGameEvaluator eval) {
-    super(eval);
+  public MnkGameMinimaxSearcher(MnkGame game, Class<? extends MnkGameEvaluator> eval) {
+    super(game, eval);
   }
 
   @Override

@@ -3,6 +3,7 @@
  */
 package game;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -13,7 +14,8 @@ import java.util.concurrent.TimeoutException;
 
 import search.MnkGameMinimaxSearcher;
 import search.MnkGameSearcher;
-import eval.MnkGameRandomEvaluator;
+import eval.MnkGameBasicEvaluator;
+import eval.MnkGameEvaluator;
 
 
 /**
@@ -33,6 +35,8 @@ public class MnkGameAi {
   public static final int MIN_TIME = 10;
   public static final int MAX_TIME = Integer.MAX_VALUE;
 
+  private Class<? extends MnkGameSearcher> sc;
+  private Class<? extends MnkGameEvaluator> ec;
   private MnkGameSearcher searcher;
 
   private int depth;
@@ -42,7 +46,9 @@ public class MnkGameAi {
 
 
   public MnkGameAi(MnkGame game) {
-    searcher = new MnkGameMinimaxSearcher(new MnkGameRandomEvaluator(game));
+    sc = MnkGameMinimaxSearcher.class;
+    ec = MnkGameBasicEvaluator.class;
+    initializeSearcher(game);
 
     depth = MAX_DEPTH;
     time = MAX_TIME;
@@ -50,6 +56,20 @@ public class MnkGameAi {
     log = LOG_ALL;
   }
 
+
+  public void setEvaluator(Class<? extends MnkGameEvaluator> ec) {
+    this.ec = ec;
+    initializeSearcher(getGame());
+  }
+
+  public void setSearcher(Class<? extends MnkGameSearcher> sc) {
+    this.sc = sc;
+    initializeSearcher(getGame());
+  }
+
+  public void setGame(MnkGame game) {
+    initializeSearcher(game);
+  }
 
   public void setMaxDepth(int depth) {
     if (depth < MIN_DEPTH || depth > MAX_DEPTH)
@@ -130,6 +150,16 @@ public class MnkGameAi {
     return move;
   }
 
+
+  private void initializeSearcher(MnkGame g) {
+    try {
+      searcher = sc.getConstructor(MnkGame.class, Class.class).newInstance(g, ec);
+    } catch (NoSuchMethodException | SecurityException | InstantiationException
+        | IllegalAccessException | IllegalArgumentException
+        | InvocationTargetException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
 
   private void printSearchResultHeader() {
     System.out.println("Depth\tTime\tNodes\tScore\tVariation");

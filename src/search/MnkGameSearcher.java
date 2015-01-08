@@ -3,9 +3,11 @@
  */
 package search;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import eval.MnkGameBasicEvaluator;
 import eval.MnkGameEvaluator;
 import game.MnkGame;
 
@@ -73,9 +75,19 @@ public abstract class MnkGameSearcher {
   private long nodes;
 
 
-  public MnkGameSearcher(MnkGameEvaluator eval) {
-    this.game = eval.getGame();
-    this.eval = eval;
+  public MnkGameSearcher(MnkGame game, Class<? extends MnkGameEvaluator> eval) {
+    this.game = game;
+    try {
+      this.eval = eval.getConstructor(MnkGame.class).newInstance(game);
+    } catch (NoSuchMethodException | SecurityException | InstantiationException
+        | IllegalAccessException | IllegalArgumentException
+        | InvocationTargetException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+
+  public MnkGameSearcher(MnkGame game) {
+    this(game, MnkGameBasicEvaluator.class);
   }
 
 
