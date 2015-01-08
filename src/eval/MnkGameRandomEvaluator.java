@@ -31,6 +31,8 @@ public class MnkGameRandomEvaluator extends MnkGameEvaluator {
       case MnkGame.PLAYER_2:
         return MIN_SCORE;
       default:
+        if (getGame().isGameOver())
+          return 0;
         return rand.nextInt(MAX_SCORE) - MAX_SCORE / 2;
     }
   }
