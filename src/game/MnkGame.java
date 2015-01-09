@@ -241,10 +241,76 @@ public class MnkGame {
     };
   }
 
+  public Iterable<Integer> generateInOutPseudolegalMoves() {
+    return new Iterable<Integer>() {
+      @Override
+      public Iterator<Integer> iterator() {
+        return new Iterator<Integer>() {
+          int index = (m + 1) * Math.min((n - 1) / 2, (m - 1) / 2);
+          int start = index;
+
+          boolean shortSideEven = (m > n ? n & 1 : m & 1) == 0;
+          int col = 0, ncol = Math.max(0, m - n) + (shortSideEven ? 1 : 0);
+          int row = 0, nrow = Math.max(0, n - m) + (shortSideEven ? 1 : 0);
+
+          @Override
+          public boolean hasNext() {
+            while (true) {
+              if (row > nrow) {
+                if (start <= 0)
+                  return false;
+                index = (start -= m + 1);
+                col = 0;
+                row = 0;
+                ncol += 2;
+                nrow += 2;
+                continue;
+              }
+              if (col > ncol) {
+                index += m - 1 - ncol;
+                col = 0;
+                row++;
+                continue;
+              }
+              if (board[index] == PLAYER_NONE)
+                return true;
+              goNext();
+            }
+          }
+
+          @Override
+          public Integer next() {
+            if (!hasNext())
+              throw new NoSuchElementException();
+            int ret = index;
+            goNext();
+            return ret;
+          }
+
+          private void goNext() {
+            if (col == 0 && row != 0 && row != nrow && ncol != 0) {
+              index += ncol;
+              col += ncol;
+            } else {
+              index++;
+              col++;
+            }
+          }
+        };
+      }
+    };
+  }
+
   public Iterable<Integer> generateLegalMoves() {
     if (winner != PLAYER_NONE)
       return Collections.emptyList();
     return generatePseudolegalMoves();
+  }
+
+  public Iterable<Integer> generateInOutLegalMoves() {
+    if (winner != PLAYER_NONE)
+      return Collections.emptyList();
+    return generateInOutPseudolegalMoves();
   }
 
 
