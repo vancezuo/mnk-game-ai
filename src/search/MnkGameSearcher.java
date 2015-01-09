@@ -7,7 +7,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import eval.MnkGameBasicEvaluator;
 import eval.MnkGameEvaluator;
 import game.MnkGame;
 
@@ -84,10 +83,6 @@ public abstract class MnkGameSearcher {
         | InvocationTargetException e) {
       throw new IllegalArgumentException(e);
     }
-  }
-
-  public MnkGameSearcher(MnkGame game) {
-    this(game, MnkGameBasicEvaluator.class);
   }
 
 

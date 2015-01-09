@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
+import search.MnkGameAlphabetaSearcher;
 import search.MnkGameMinimaxSearcher;
 import search.MnkGameSearcher;
 import eval.MnkGameBasicEvaluator;
@@ -222,6 +223,7 @@ public class MnkGameDemo {
     }};
     searcherMap = new HashMap<String, Class<? extends MnkGameSearcher>>() {{
       put("minimax", MnkGameMinimaxSearcher.class);
+      put("alphabeta", MnkGameAlphabetaSearcher.class);
     }};
     ai = new MnkGameAi(game);
   }
