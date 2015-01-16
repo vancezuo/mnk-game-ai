@@ -24,7 +24,7 @@ public class MnkGameAlphabetaSearcher extends MnkGameSearcher {
 
   @Override
   public Result search(int depth) {
-    return search(depth, MnkGameEvaluator.MIN_SCORE, MnkGameEvaluator.MAX_SCORE);
+    return search(depth, MnkGameEvaluator.MIN_SCORE - 1, MnkGameEvaluator.MAX_SCORE + 1);
   }
 
   private Result search(int depth, int alpha, int beta) {
@@ -50,15 +50,22 @@ public class MnkGameAlphabetaSearcher extends MnkGameSearcher {
         if (maxi) alpha = score; else beta = score;
         if (alpha >= beta)
           break;
+        proof = result.isProvenResult();
         pv.clear();
         pv.add(move);
         if (result.getPrincipleVaration() != null)
           pv.addAll(result.getPrincipleVaration());
-        proof = result.isProvenResult();
       }
     }
 
-    return new Result(maxi ? alpha : beta, pv, proof);
+    int score = maxi ? alpha : beta;
+    if (score == MnkGameEvaluator.MIN_SCORE + depth - 1) {
+      score++;
+    } else if (score == MnkGameEvaluator.MAX_SCORE - depth + 1) {
+      score--;
+    }
+
+    return new Result(score, pv, proof);
   }
 
 }
