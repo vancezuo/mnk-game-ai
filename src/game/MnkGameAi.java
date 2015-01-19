@@ -169,11 +169,24 @@ public class MnkGameAi {
     System.out.printf("%d\t", d);
     System.out.printf("%.3f\t", t / 1000.0);
     System.out.printf("%d\t", n);
-    System.out.printf("% .3f\t", r.getScoreScaled());
+    if (r.isProvenResult()) {
+      String result;
+      int distance;
+      if (r.getScore() != 0) {
+        result = "win";
+        distance = Math.abs(Math.abs(r.getScore()) - MnkGameEvaluator.MAX_SCORE);
+      } else {
+        result = "draw";
+        distance = getGame().getPseudolegalMoves(); // remaining turns left
+      }
+      System.out.printf("%s-%d\t", result, distance);
+    } else {
+      System.out.printf("%d\t", r.getScore());
+    }
     for (int move : r.getPrincipleVaration()) {
       int row = getGame().getRow(move);
       int col = getGame().getCol(move);
-      System.out.print(" " + row + "," + col);
+      System.out.print(row + "," + col + " ");
     }
     System.out.println();
   }

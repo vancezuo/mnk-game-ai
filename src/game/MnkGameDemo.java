@@ -13,6 +13,7 @@ import search.MnkGameMinimaxSearcher;
 import search.MnkGameSearcher;
 import eval.MnkGameBasicEvaluator;
 import eval.MnkGameEvaluator;
+import eval.MnkGameLineEvaluator;
 import eval.MnkGameRandomEvaluator;
 
 /**
@@ -220,6 +221,7 @@ public class MnkGameDemo {
     evaluatorMap = new HashMap<String, Class<? extends MnkGameEvaluator>>() {{
       put("basic", MnkGameBasicEvaluator.class);
       put("random", MnkGameRandomEvaluator.class);
+      put("line", MnkGameLineEvaluator.class);
     }};
     searcherMap = new HashMap<String, Class<? extends MnkGameSearcher>>() {{
       put("minimax", MnkGameMinimaxSearcher.class);

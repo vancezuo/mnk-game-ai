@@ -18,7 +18,6 @@ public class MnkGame {
   public static final int PLAYER_1 = 1;
   public static final int PLAYER_2 = -PLAYER_1;
 
-
   private final int m, n, k, p, q;
   private final int[] board;
   private final int[] history;
@@ -120,6 +119,14 @@ public class MnkGame {
     return n;
   }
 
+  public int getDiagonals() {
+    return m + n - 1;
+  }
+
+  public int getAntiDiagonals() {
+    return getDiagonals();
+  }
+
   public int getK() {
     return k;
   }
@@ -156,9 +163,64 @@ public class MnkGame {
     return square / m;
   }
 
+  public int[] getRowSquares(int row) {
+    int[] list = new int[m];
+    for (int col = 0; col < m; col++)
+      list[col] = board[getSquare(row, col)];
+    return list;
+  }
+
   public int getCol(int square) {
     return square % m;
   }
+
+  public int[] getColSquares(int col) {
+    int[] list = new int[n];
+    for (int row = 0; row < n; row++)
+      list[row] = board[getSquare(row, col)];
+    return list;
+  }
+
+  public int getDiagonal(int square) {
+    return getCol(square) - getRow(square) - getRows();
+  }
+
+  public int[] getDiagonalSquares(int diag) {
+    int[] list = new int[getDiagonalSize(diag)];
+    int startRow = Math.max(n - 1 - diag, 0);
+    int startCol = Math.max(diag - n, 0);
+    int square = getSquare(startRow, startCol);
+    for (int i = 0; i < list.length; i++) {
+      list[i] = square;
+      square += m + 1;
+    }
+    return list;
+  }
+
+  public int getDiagonalSize(int diag) {
+    return getAntiDiagonalSize(diag);
+  }
+
+  public int getAntiDiagonal(int square) {
+    return getCol(square) + getRow(square);
+  }
+
+  public int[] getAntiDiagonalSquares(int diag) {
+    int[] list = new int[getAntiDiagonalSize(diag)];
+    int startRow = Math.max(diag - m, 0);
+    int startCol = Math.min(diag, m - 1);
+    int square = getSquare(startRow, startCol);
+    for (int i = 0; i < list.length; i++) {
+      list[i] = square;
+      square += m - 1;
+    }
+    return list;
+  }
+
+  public int getAntiDiagonalSize(int diag) {
+    return min(n + m - 1 - diag, diag + 1, n, m);
+  }
+
 
   public int getPiece(int square) {
     return board[square];
@@ -333,6 +395,10 @@ public class MnkGame {
       }
     }
     return PLAYER_NONE;
+  }
+
+  private int min(int i0, int i1, int i2, int i3) {
+    return Math.min(Math.min(i0, i1), Math.min(i2, i3));
   }
 
 }
