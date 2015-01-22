@@ -287,7 +287,7 @@ public class MnkGameDemo {
       System.out.printf("%2d", col);
     }
     System.out.println();
-    for (int row = 0; row < game.getRows(); row++) {
+    for (int row = game.getRows() - 1; row >= 0; row--) {
       System.out.printf("%2d ", row);
       for (int col = 0; col < game.getCols(); col++) {
         String c = playerCharMap.get(board[row][col]);
