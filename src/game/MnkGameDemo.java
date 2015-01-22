@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 import search.MnkGameAlphabetaSearcher;
 import search.MnkGameMinimaxSearcher;
+import search.MnkGameOrderedAbSearcher;
 import search.MnkGameSearcher;
 import eval.MnkGameBasicEvaluator;
 import eval.MnkGameEvaluator;
@@ -226,6 +227,7 @@ public class MnkGameDemo {
     searcherMap = new HashMap<String, Class<? extends MnkGameSearcher>>() {{
       put("minimax", MnkGameMinimaxSearcher.class);
       put("alphabeta", MnkGameAlphabetaSearcher.class);
+      put("alphabeta+", MnkGameOrderedAbSearcher.class);
     }};
     ai = new MnkGameAi(game);
   }

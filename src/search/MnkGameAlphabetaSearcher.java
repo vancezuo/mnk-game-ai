@@ -27,6 +27,16 @@ public class MnkGameAlphabetaSearcher extends MnkGameSearcher {
     return search(depth, MnkGameEvaluator.MIN_SCORE - 1, MnkGameEvaluator.MAX_SCORE + 1);
   }
 
+
+  protected Iterable<Integer> generateMoves() {
+    return getGame().generatePseudolegalMoves();
+  }
+
+  protected int numMoves() {
+    return getGame().getPseudolegalMoves();
+  }
+
+
   private Result search(int depth, int alpha, int beta) {
     incrementNodeCount();
 
@@ -39,7 +49,7 @@ public class MnkGameAlphabetaSearcher extends MnkGameSearcher {
 
     List<Integer> pv = new ArrayList<>(depth);
     boolean proof = false;
-    for (int move : getGame().generatePseudolegalMoves()) {
+    for (int move : generateMoves()) {
       getGame().doMove(move, false);
       Result result = search(depth - 1, alpha, beta);
       getGame().undoMove();
@@ -48,9 +58,9 @@ public class MnkGameAlphabetaSearcher extends MnkGameSearcher {
       int score = result.getScore();
       if (maxi ? score > alpha : score < beta) {
         if (maxi) alpha = score; else beta = score;
+        proof = result.isProvenResult();
         if (alpha >= beta)
           break;
-        proof = result.isProvenResult();
         pv.clear();
         pv.add(move);
         if (result.getPrincipleVaration() != null)

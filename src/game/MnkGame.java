@@ -233,6 +233,12 @@ public class MnkGame {
     return historyTrimmed;
   }
 
+  public int getHistory(int ply) {
+    if (ply < 0 || ply >= history.length)
+      throw new IllegalArgumentException("Illegal history move access.");
+    return history[ply];
+  }
+
   public int[][] getBoard() {
     int[][] board2d = new int[n][m];
     for (int row = 0; row < n; row++)
