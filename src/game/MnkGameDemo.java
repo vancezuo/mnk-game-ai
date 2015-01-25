@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Vance Zuo
+ *  Copyright 2014 Vance Zuo
  */
 package game;
 
@@ -66,6 +66,7 @@ public class MnkGameDemo {
     @Override
     public void execute(String... args) {
       int m = 3, n = 3, k = 3, p = 1, q = 1;
+      boolean drop = false;
       try {
         if (args.length >= 3) {
           m = Integer.parseInt(args[0]);
@@ -76,11 +77,14 @@ public class MnkGameDemo {
           p = Integer.parseInt(args[3]);
           q = Integer.parseInt(args[4]);
         }
+        if (args.length >= 6) {
+          drop = args[5].equalsIgnoreCase("drop");
+        }
       } catch (NumberFormatException e) {
         System.out.println("Parse error: " + e.getMessage());
         return;
       }
-      getGame().newGame(m, n, k, p, q);
+      getGame().newGame(m, n, k, p, q, drop);
     }
   }
 
@@ -271,12 +275,14 @@ public class MnkGameDemo {
   }
 
 
-  private void newGame(int m, int n, int k, int p, int q) {
-    game = new MnkGame(m, n, k, p, q);
+  private void newGame(int m, int n, int k, int p, int q, boolean drop) {
+    game = new MnkGame(m, n, k, p, q, drop);
     ai.setGame(game);
     System.out.printf("New game: %d by %d board; %d-in-a-row", n, m, k);
     if (p > 1 || q > 1)
       System.out.printf("; %d, %d, %d... moves", q, p, p);
+    if (drop)
+      System.out.printf("; dropped pieces");
     System.out.println(".");
   }
 

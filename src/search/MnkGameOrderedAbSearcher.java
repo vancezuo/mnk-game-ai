@@ -41,7 +41,11 @@ public class MnkGameOrderedAbSearcher extends MnkGameAlphabetaSearcher {
       int bottom = game.getRows() - 1 - top;
       int left = game.getCol(i);
       int right = game.getCols() - 1 - left;
-      weights[i] = Math.min(Math.min(top, bottom), Math.min(left, right));
+      if (game.hasDropMoves()) {
+        weights[i] = Math.min(left, right);
+      } else {
+        weights[i] = Math.min(Math.min(top, bottom), Math.min(left, right));
+      }
     }
     lastPly = 0;
   }

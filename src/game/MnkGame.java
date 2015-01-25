@@ -19,13 +19,14 @@ public class MnkGame {
   public static final int PLAYER_2 = -PLAYER_1;
 
   private final int m, n, k, p, q;
+  private final boolean drop;
   private final int[] board;
   private final int[] history;
   private int ply;
   private int turn, winner;
 
 
-  public MnkGame(int m, int n, int k, int p, int q) {
+  public MnkGame(int m, int n, int k, int p, int q, boolean drop) {
     if (m <= 0)
       throw new IllegalArgumentException("Non-positive m: " + m);
     if (n <= 0)
@@ -42,11 +43,16 @@ public class MnkGame {
     this.k = k;
     this.p = p;
     this.q = q;
+    this.drop = drop;
     board = new int[n * m];
     history = new int[n * m];
     ply = 0;
     turn = PLAYER_1;
     winner = PLAYER_NONE;
+  }
+
+  public MnkGame(int m, int n, int k, int p, int q) {
+    this(m, n, k, p, q, false);
   }
 
   public MnkGame(int m, int n, int k) {
@@ -96,7 +102,8 @@ public class MnkGame {
 
   public boolean canDoMove(int square) {
     return (0 <= square && square < n * m) && (board[square] == PLAYER_NONE)
-        && (winner == PLAYER_NONE);
+        && (winner == PLAYER_NONE)
+        && (!drop || getRow(square) == 0 || board[square - m] != PLAYER_NONE);
   }
 
   public boolean canUndoMove() {
@@ -137,6 +144,10 @@ public class MnkGame {
 
   public int getFirstTurnMoves() {
     return q;
+  }
+
+  public boolean hasDropMoves() {
+    return drop;
   }
 
   public int getOccupiedSquares() {
@@ -272,6 +283,8 @@ public class MnkGame {
   }
 
   public int getPseudolegalMoves() {
+    if (drop)
+      return getCols() - getOccupiedCols();
     return getSquares() - getOccupiedSquares();
   }
 
@@ -282,6 +295,61 @@ public class MnkGame {
   }
 
   public Iterable<Integer> generatePseudolegalMoves() {
+    return drop ? genDropPseudolegalMoves() : genFullPseudolegalMoves();
+  }
+
+  public Iterable<Integer> generateInOutPseudolegalMoves() {
+    return drop ? genInOutDropPseudolegalMvs() : genInOutFullPseudolegalMvs();
+  }
+
+  public Iterable<Integer> generateLegalMoves() {
+    if (winner != PLAYER_NONE)
+      return Collections.emptyList();
+    return generatePseudolegalMoves();
+  }
+
+  public Iterable<Integer> generateInOutLegalMoves() {
+    if (winner != PLAYER_NONE)
+      return Collections.emptyList();
+    return generateInOutPseudolegalMoves();
+  }
+
+
+  private int calculateWinner(int square) {
+    int row = getRow(square);
+    int col = getCol(square);
+    int[][] dirs = { {-1, 1}, {-m, m}, {-m - 1, m + 1}, {-m + 1, m - 1} };
+    int[][] lens = { {col, m - 1 - col}, {row, n - 1 - row},
+                     {Math.min(col, row), Math.min(m - 1 - col, n - 1 - row)},
+                     {Math.min(m - 1 - col, row), Math.min(col, n - 1 - row)} };
+    for (int i0 = 0; i0 < 4; i0++) {
+      int consecutive = 1;
+      for (int i1 = 0; i1 < 2; i1++) {
+        for (int index = square, j = 0; j < lens[i0][i1]; j++) {
+          if (board[(index += dirs[i0][i1])] != turn)
+            break;
+          if (++consecutive >= k)
+            return turn;
+        }
+      }
+    }
+    return PLAYER_NONE;
+  }
+
+  private int min(int i0, int i1, int i2, int i3) {
+    return Math.min(Math.min(i0, i1), Math.min(i2, i3));
+  }
+
+  private int getOccupiedCols() {
+    int total = 0;
+    for (int i = (n - 1) * m; i < n * m; i++) {
+      if (board[i] != PLAYER_NONE)
+        total++;
+    }
+    return total;
+  }
+
+  private Iterable<Integer> genFullPseudolegalMoves() {
     return new Iterable<Integer>() {
       @Override
       public Iterator<Integer> iterator() {
@@ -309,7 +377,40 @@ public class MnkGame {
     };
   }
 
-  public Iterable<Integer> generateInOutPseudolegalMoves() {
+  private Iterable<Integer> genDropPseudolegalMoves() {
+    return new Iterable<Integer>() {
+      @Override
+      public Iterator<Integer> iterator() {
+        return new Iterator<Integer>() {
+          int index = 0;
+          int col = 0;
+
+          @Override
+          public boolean hasNext() {
+            while (col < m) {
+              if (board[index] == PLAYER_NONE)
+                return true;
+              index += m;
+              if (index >= m * n)
+                index = ++col;
+            }
+            return false;
+          }
+
+          @Override
+          public Integer next() {
+            if (!hasNext())
+              throw new NoSuchElementException();
+            int ret = index;
+            index = ++col;
+            return ret;
+          }
+        };
+      }
+    };
+  }
+
+  private Iterable<Integer> genInOutFullPseudolegalMvs() {
     return new Iterable<Integer>() {
       @Override
       public Iterator<Integer> iterator() {
@@ -369,42 +470,44 @@ public class MnkGame {
     };
   }
 
-  public Iterable<Integer> generateLegalMoves() {
-    if (winner != PLAYER_NONE)
-      return Collections.emptyList();
-    return generatePseudolegalMoves();
-  }
+  private Iterable<Integer> genInOutDropPseudolegalMvs() {
+    return new Iterable<Integer>() {
+      @Override
+      public Iterator<Integer> iterator() {
+        return new Iterator<Integer>() {
+          int index = m / 2;
+          int col = m / 2;
+          int change = ((m & 1) == 0) ? 1 : -1;
 
-  public Iterable<Integer> generateInOutLegalMoves() {
-    if (winner != PLAYER_NONE)
-      return Collections.emptyList();
-    return generateInOutPseudolegalMoves();
-  }
+          @Override
+          public boolean hasNext() {
+            while (col >= 0) {
+              if (board[index] == PLAYER_NONE)
+                return true;
+              index += m;
+              if (index >= m * n) {
+                goNext();
+              }
+            }
+            return false;
+          }
 
+          @Override
+          public Integer next() {
+            if (!hasNext())
+              throw new NoSuchElementException();
+            int ret = index;
+            goNext();
+            return ret;
+          }
 
-  private int calculateWinner(int square) {
-    int row = getRow(square);
-    int col = getCol(square);
-    int[][] dirs = { {-1, 1}, {-m, m}, {-m - 1, m + 1}, {-m + 1, m - 1} };
-    int[][] lens = { {col, m - 1 - col}, {row, n - 1 - row},
-                     {Math.min(col, row), Math.min(m - 1 - col, n - 1 - row)},
-                     {Math.min(m - 1 - col, row), Math.min(col, n - 1 - row)} };
-    for (int i0 = 0; i0 < 4; i0++) {
-      int consecutive = 1;
-      for (int i1 = 0; i1 < 2; i1++) {
-        for (int index = square, j = 0; j < lens[i0][i1]; j++) {
-          if (board[(index += dirs[i0][i1])] != turn)
-            break;
-          if (++consecutive >= k)
-            return turn;
-        }
+          private void goNext() {
+            index = (col += change);
+            change *= -1;
+            change += (change > 0) ? 1 : -1;
+          }
+        };
       }
-    }
-    return PLAYER_NONE;
+    };
   }
-
-  private int min(int i0, int i1, int i2, int i3) {
-    return Math.min(Math.min(i0, i1), Math.min(i2, i3));
-  }
-
 }
