@@ -55,7 +55,7 @@ public abstract class MnkGameSearcher {
       return pv;
     }
 
-    public int getPrincipleVarationDepth() {
+    public int getPrincipleVarationLength() {
       return pv.size();
     }
 
@@ -88,6 +88,14 @@ public abstract class MnkGameSearcher {
 
   protected final void incrementNodeCount() {
     nodes++;
+  }
+
+  protected Iterable<Integer> generateMoves() {
+    return getGame().generatePseudolegalMoves();
+  }
+
+  protected int numMoves() {
+    return getGame().getPseudolegalMoves();
   }
 
   public final MnkGame getGame() {
