@@ -182,7 +182,7 @@ public class MnkGame {
   }
 
   public int getDiagonal(int square) {
-    return getCol(square) - getRow(square) - getRows();
+    return getCol(square) - getRow(square) + getRows() - 1;
   }
 
   public int[] getDiagonalSquares(int diag) {
